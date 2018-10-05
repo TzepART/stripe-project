@@ -52,11 +52,11 @@ class StripeClient
 
     /**
      * @param User $user
-     * @param $token
+     * @param string $token
      * @return StripeObject
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function getCustomerByUser(User $user, $token)
+    public function getCustomerByUser(User $user, string $token)
     {
         if (!$user->getStripeCustomerId()) {
             $customer = $this->createCustomer($user, $token);
@@ -104,11 +104,11 @@ class StripeClient
 
     /**
      * @param User $user
-     * @param $token
+     * @param string $token
      * @return \Stripe\ApiResource
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    protected function createCustomer(User $user, $token): \Stripe\ApiResource
+    protected function createCustomer(User $user, string $token): \Stripe\ApiResource
     {
         $customer = Customer::create(array(
             "email" => $user->getEmail(),
@@ -124,10 +124,10 @@ class StripeClient
 
     /**
      * @param User $user
-     * @param $token
+     * @param string $token
      * @return StripeObject
      */
-    protected function updateCustomer(User $user, $token): StripeObject
+    protected function updateCustomer(User $user, string $token): StripeObject
     {
         /** @var StripeObject $customer */
         $customer = Customer::retrieve($user->getStripeCustomerId());
