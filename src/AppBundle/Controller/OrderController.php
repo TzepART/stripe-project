@@ -10,7 +10,6 @@ use Psr\Container\NotFoundExceptionInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Stripe\Stripe;
 use Symfony\Component\HttpFoundation\Request;
 
 class OrderController extends BaseController
@@ -35,42 +34,51 @@ class OrderController extends BaseController
     /**
      * @Route("/checkout", name="order_checkout")
      * @Security("is_granted('ROLE_USER')")
+     * @Method("GET")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function checkoutAction(Request $request)
     {
         $products = $this->get(self::SHOPPING_CART_SERVICE_KEY)->getProducts();
-
-        if ($request->isMethod('POST')) {
-
-            $stripeClient = $this->get('app_stripe_client');
-
-            $token = $request->get('stripeToken');
-            Stripe::setApiKey($this->getParameter(AppBundle::STRIPE_SECRET_KEY));
-
-            try {
-                $customer = $stripeClient->createCustomer($this->getUser(),$token);
-//                $stripeClient->createCharge($this->getUser());
-                $stripeClient->createInvoice($this->getUser());
-            } catch (NotFoundExceptionInterface $e) {
-
-            } catch (ContainerExceptionInterface $e) {
-
-            }
-
-            $this->get(self::SHOPPING_CART_SERVICE_KEY)->emptyCart();
-            $this->addFlash('success', 'Order Complete! Congratulation!');
-
-            return $this->redirectToRoute('homepage');
-        }
 
         return $this->render('order/checkout.html.twig', array(
             'products' => $products,
             'cart' => $this->get(self::SHOPPING_CART_SERVICE_KEY),
             'stripe_public_key' => $this->getParameter(AppBundle::STRIPE_PUBLIC_KEY)
         ));
+
+    }
+
+    /**
+     * @Route("/checkout", name="pay_order")
+     * @Security("is_granted('ROLE_USER')")
+     * @Method("POST")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function payOrderAction(Request $request)
+    {
+        /** @var StripeClient $stripeClient */
+        $stripeClient = $this->get('app_stripe_client');
+
+        $token = $request->get('stripeToken');
+
+        try {
+            $customer = $stripeClient->getCustomerByUser($this->getUser(),$token);
+//                $stripeClient->createCharge($this->getUser());
+            $stripeClient->createInvoice($this->getUser());
+        } catch (NotFoundExceptionInterface $e) {
+            $this->addFlash('error', $e->getMessage());
+        } catch (ContainerExceptionInterface $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
+        $this->get(self::SHOPPING_CART_SERVICE_KEY)->emptyCart();
+        $this->addFlash('success', 'Order Complete! Congratulation!');
+
+        return $this->redirectToRoute('homepage');
 
     }
 }
