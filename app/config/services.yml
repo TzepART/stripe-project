@@ -7,3 +7,9 @@ services:
     shopping_cart:
         class: AppBundle\Store\ShoppingCart
         autowire: true
+
+    app_stripe_client:
+        class: AppBundle\Service\StripeClient
+        arguments:
+          - '@service_container'
+        autowire: true

@@ -4,20 +4,19 @@ namespace AppBundle\Controller;
 
 use AppBundle\AppBundle;
 use AppBundle\Entity\Product;
+use AppBundle\Service\StripeClient;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Stripe\Charge;
-use Stripe\Customer;
-use Stripe\Invoice;
-use Stripe\InvoiceItem;
 use Stripe\Stripe;
-use Stripe\StripeObject;
 use Symfony\Component\HttpFoundation\Request;
 
 class OrderController extends BaseController
 {
     const SHOPPING_CART_SERVICE_KEY = 'shopping_cart';
+    const APP_STRIPE_CLIENT_SERVICE_KEY = 'app_stripe_client';
 
     /**
      * @Route("/cart/product/{slug}", name="order_add_product_to_cart")
@@ -36,6 +35,9 @@ class OrderController extends BaseController
     /**
      * @Route("/checkout", name="order_checkout")
      * @Security("is_granted('ROLE_USER')")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function checkoutAction(Request $request)
     {
@@ -43,13 +45,20 @@ class OrderController extends BaseController
 
         if ($request->isMethod('POST')) {
 
+            $stripeClient = $this->get('app_stripe_client');
+
             $token = $request->get('stripeToken');
             Stripe::setApiKey($this->getParameter(AppBundle::STRIPE_SECRET_KEY));
 
-            $customer = $this->createCustomer($token);
+            try {
+                $customer = $stripeClient->createCustomer($this->getUser(),$token);
+//                $stripeClient->createCharge($this->getUser());
+                $stripeClient->createInvoice($this->getUser());
+            } catch (NotFoundExceptionInterface $e) {
 
-//            $this->createCharge($customer);
-            $this->createInvoice();
+            } catch (ContainerExceptionInterface $e) {
+
+            }
 
             $this->get(self::SHOPPING_CART_SERVICE_KEY)->emptyCart();
             $this->addFlash('success', 'Order Complete! Congratulation!');
@@ -62,65 +71,6 @@ class OrderController extends BaseController
             'cart' => $this->get(self::SHOPPING_CART_SERVICE_KEY),
             'stripe_public_key' => $this->getParameter(AppBundle::STRIPE_PUBLIC_KEY)
         ));
-
-    }
-
-    /**
-     * @param $token
-     * @return StripeObject
-     */
-    protected function createCustomer($token)
-    {
-        $user = $this->getUser();
-        if (!$user->getStripeCustomerId()) {
-            $customer = Customer::create(array(
-                "email" => $user->getEmail(),
-                "source" => $token
-            ));
-
-            $user->setStripeCustomerId($customer->id);
-            $this->getDoctrine()->getManager()->persist($user);
-            $this->getDoctrine()->getManager()->flush();
-        } else {
-            /** @var StripeObject $customer */
-            $customer = Customer::retrieve($user->getStripeCustomerId());
-            $customer->source = $token;
-            $customer->save();
-        }
-
-        return $customer;
-    }
-
-    /**
-     */
-    protected function createCharge(): void
-    {
-        Charge::create(array(
-            "amount" => $this->get(self::SHOPPING_CART_SERVICE_KEY)->getTotal() * 100,
-            "currency" => "usd",
-            "customer" => $this->getUser()->getStripeCustomerId(), // obtained with Stripe.js
-        ));
-    }
-
-    /**
-     */
-    protected function createInvoice(): void
-    {
-        foreach ($this->get(self::SHOPPING_CART_SERVICE_KEY)->getProducts() as $index => $product) {
-            InvoiceItem::create(array(
-                "amount" => $product->getPrice() * 100,
-                "currency" => "usd",
-                "customer" => $this->getUser()->getStripeCustomerId(), // obtained with Stripe.js
-                "description" => $product->getName()
-            ));
-
-        }
-
-        $invoice = Invoice::create([
-           'customer' => $this->getUser()->getStripeCustomerId()
-        ]);
-
-        $invoice->pay();
 
     }
 }
