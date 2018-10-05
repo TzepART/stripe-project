@@ -36,7 +36,7 @@ class OrderController extends BaseController
     }
 
     /**
-     * @Route("/checkout", name="order_checkout")
+     * @Route("/checkout", name="order_checkout", schemes={"%secure_channel%"})
      * @Security("is_granted('ROLE_USER')")
      * @Method("GET")
      * @param Request $request
@@ -55,7 +55,7 @@ class OrderController extends BaseController
     }
 
     /**
-     * @Route("/checkout", name="pay_order")
+     * @Route("/checkout", name="pay_order", schemes={"%secure_channel%"})
      * @Security("is_granted('ROLE_USER')")
      * @Method("POST")
      * @param Request $request
