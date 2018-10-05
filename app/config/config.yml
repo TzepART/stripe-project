@@ -79,3 +79,6 @@ stof_doctrine_extensions:
     orm:
         default:
             sluggable: true
+
+maker:
+    root_namespace: AppBundle
