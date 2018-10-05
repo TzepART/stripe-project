@@ -1,7 +1,6 @@
-# Stripe: Killer Payment Processing + ??? = Profit
+# Simple Symfony 3.4 application for Stripe
 
-This repository holds the script, code and secrets to getting
-rich quick (hint: lottery) for the KnpUniversity [Stripe Tutorial][stripe_tuts].
+This project was created for [Stripe Tutorial][stripe_tuts].
 
 ## Setup
 
@@ -11,7 +10,7 @@ rich quick (hint: lottery) for the KnpUniversity [Stripe Tutorial][stripe_tuts].
 and then (from this directory), run:
 
 ```bash
-php composer.phar install
+composer install
 ```
 
 This will interactively ask you for some settings - like `database_host`.
