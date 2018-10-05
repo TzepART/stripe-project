@@ -12,6 +12,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Class OrderController
+ * @package AppBundle\Controller
+ */
 class OrderController extends BaseController
 {
     const SHOPPING_CART_SERVICE_KEY = 'shopping_cart';

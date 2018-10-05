@@ -9,7 +9,6 @@
 namespace AppBundle\Service;
 
 
-use AppBundle\AppBundle;
 use AppBundle\Entity\Product;
 use AppBundle\Entity\User;
 use Stripe\Charge;

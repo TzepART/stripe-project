@@ -4,6 +4,10 @@ namespace AppBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+/**
+ * Class AppBundle
+ * @package AppBundle
+ */
 class AppBundle extends Bundle
 {
     const STRIPE_PUBLIC_KEY = 'stripe_public_key';

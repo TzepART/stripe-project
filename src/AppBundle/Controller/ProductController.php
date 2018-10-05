@@ -5,6 +5,10 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Product;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
+/**
+ * Class ProductController
+ * @package AppBundle\Controller
+ */
 class ProductController extends BaseController
 {
     /**
