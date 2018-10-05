@@ -32,7 +32,8 @@
         "stof/doctrine-extensions-bundle": "^1.2",
         "doctrine/doctrine-migrations-bundle": "^1.1",
         "twig/twig": "^1.24.1",
-        "symfony/maker-bundle": "^1.7"
+        "symfony/maker-bundle": "^1.7",
+        "stripe/stripe-php": "^6.19"
     },
     "require-dev": {
         "sensio/generator-bundle": "^3.0",

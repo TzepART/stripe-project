@@ -6,21 +6,42 @@ use AppBundle\Entity\Product;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Session\Session;
 
+/**
+ * Class ShoppingCart
+ * @package AppBundle\Store
+ */
 class ShoppingCart
 {
     const CART_PRODUCTS_KEY = '_shopping_cart.products';
 
+    /**
+     * @var Session
+     */
     private $session;
+    /**
+     * @var EntityManager
+     */
     private $em;
 
+    /**
+     * @var
+     */
     private $products;
 
+    /**
+     * ShoppingCart constructor.
+     * @param Session $session
+     * @param EntityManager $em
+     */
     public function __construct(Session $session, EntityManager $em)
     {
         $this->session = $session;
         $this->em = $em;
     }
 
+    /**
+     * @param Product $product
+     */
     public function addProduct(Product $product)
     {
         $products = $this->getProducts();
@@ -56,6 +77,9 @@ class ShoppingCart
         return $this->products;
     }
 
+    /**
+     * @return int
+     */
     public function getTotal()
     {
         $total = 0;
@@ -66,6 +90,9 @@ class ShoppingCart
         return $total;
     }
 
+    /**
+     *
+     */
     public function emptyCart()
     {
         $this->updateProducts([]);
