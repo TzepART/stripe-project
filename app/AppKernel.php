@@ -29,6 +29,7 @@ class AppKernel extends Kernel
             $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
             $bundles[] = new Hautelook\AliceBundle\HautelookAliceBundle();
             $bundles[] = new Symfony\Bundle\WebServerBundle\WebServerBundle();
+            $bundles[] = new Symfony\Bundle\MakerBundle\MakerBundle();
         }
 
         return $bundles;
