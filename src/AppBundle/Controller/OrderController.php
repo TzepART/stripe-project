@@ -10,6 +10,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Stripe\Error\Card;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -73,6 +74,9 @@ class OrderController extends BaseController
             $customer = $stripeClient->getCustomerByUser($this->getUser(),$token);
 //                $stripeClient->createCharge($this->getUser());
             $stripeClient->createInvoice($this->getUser());
+            $this->addFlash('success', 'Order Complete! Congratulation!');
+        } catch (Card $e) {
+            $this->addFlash('error', $e->getMessage());
         } catch (NotFoundExceptionInterface $e) {
             $this->addFlash('error', $e->getMessage());
         } catch (ContainerExceptionInterface $e) {
@@ -80,7 +84,6 @@ class OrderController extends BaseController
         }
 
         $this->get(self::SHOPPING_CART_SERVICE_KEY)->emptyCart();
-        $this->addFlash('success', 'Order Complete! Congratulation!');
 
         return $this->redirectToRoute('homepage');
 
